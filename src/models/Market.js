@@ -13,4 +13,4 @@ const MarketSchema = new Schema({
 
 })
 
-export default model('Market', UserSchema);
+export default model('Market', MarketSchema);
