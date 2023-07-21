@@ -3,13 +3,13 @@ import { Schema, model} from "mongoose";
 const MarketSchema = new Schema({
 
     thumbnail: String,
-    decription: String,
+    description: String,
     price: Number,
     status: Boolean,
     user:{
         type: Schema.Types.ObjectId,
         ref: 'User'
-    }
+    },
 
 }, {
 
