@@ -20,9 +20,9 @@ const MarketSchema = new Schema({
   });
   
   
-MarketSchema.virtual('thumnail_url').get(function(){
+MarketSchema.virtual('thumbnail_url').get(function(){
 
-return `http://localhost:3030/files/${this.thumnail}`;
+return `http://localhost:3030/files/${this.thumbnail}`;
   })
 
 export default model('Market', MarketSchema);
