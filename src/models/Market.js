@@ -11,6 +11,18 @@ const MarketSchema = new Schema({
         ref: 'User'
     }
 
-})
+}, {
+
+    toJSON: {
+      virtuals: true
+    }
+
+  });
+  
+  
+MarketSchema.virtual('thumnail_url').get(function(){
+
+return `http://localhost:3030/files/${this.thumnail}`;
+  })
 
 export default model('Market', MarketSchema);

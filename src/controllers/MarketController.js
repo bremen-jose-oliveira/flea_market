@@ -16,18 +16,7 @@ class MarketController{
     price,
     status,
 
-    },{
-
-      toJSON: {
-        virtuals: true
-      }
-
     });
-
-    MakerSchema.virtual('thumnail_url').get(function(){
-
-return `http://localhost:3030/file/${this.thumnail}`
-    })
 
         return res.json(market);
 
