@@ -28,8 +28,10 @@ class MarketController{
     status,
 
     });
+ 
 
         return res.json(market);
+      
 
     }
 
@@ -43,7 +45,10 @@ class MarketController{
       const user = await User.findById(user_id);
       const markets = await Market.findById(market_id);
 
-      if( String(User._id) !== String(markets.user)){
+
+     console.log( "Edited with User "+ await user._id);
+
+      if( String(user._id) !== String(markets.user)){
         return res.status(401).json({ error: 'User not authorised!'});
       }
 
@@ -70,9 +75,10 @@ class MarketController{
       const user = await User.findById(user_id);
       const markets = await Market.findById(market_id);
 
-      if( String(User._id) !== String(markets.user)){ 
+      if( String(user._id) !== String(markets.user)){ 
         return res.status(401).json({ error: 'User is not authorised'});
       }
+      console.log( "Deleted with user  "+ await user._id);
 
       await Market.findByIdAndDelete({ _id: market_id});
 

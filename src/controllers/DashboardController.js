@@ -1,12 +1,19 @@
-import market from "../models/Market";
+import Market from "../models/Market";
+
 
 
 class DashboardController{
 
     async show(req, res){
 
-        return res.json({ok: true});
+       
 
+        const {user_id} = req.headers;
+
+        const markets = await Market.find({ user: user_id})
+
+
+ return res.json(markets);
 
 
     }
