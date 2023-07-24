@@ -16,18 +16,11 @@ class MarketController{
 
   async store(req, res){
 
-   
-
     const schema = Yup.object().shape({
-
-      description: Yup.string().required,
-      price: Yup.number().required,
-      status: Yup.boolean().required,
-
+      description: Yup.string().required(),
+      price: Yup.number().required(),
+      status: Yup.boolean().required(),
     });
-
-
-    
 
     const { filename } = req.file;
     const { description, price , status} = req.body;
@@ -35,7 +28,7 @@ class MarketController{
 
     if(!(await schema.isValid(req.body))){
 
-      return res.status(401).json({ error: " bad request"});
+      return res.status(400).json({ error: " bad request"});
     }
 
 
