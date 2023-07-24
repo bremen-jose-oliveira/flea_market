@@ -1,5 +1,6 @@
 import Market from '../models/Market';
 import User from '../models/User';
+import * as Yup from 'yup';
 
 class MarketController{
 
@@ -15,9 +16,30 @@ class MarketController{
 
   async store(req, res){
 
+   
+
+    const schema = Yup.object().shape({
+
+      description: Yup.string().required,
+      price: Yup.number().required,
+      status: Yup.boolean().required,
+
+    });
+
+
+    
+
     const { filename } = req.file;
     const { description, price , status} = req.body;
     const { user_id } = req.headers;
+
+    if(!(await schema.isValid(req.body))){
+
+      return res.status(401).json({ error: " bad request"});
+    }
+
+
+
 
     const market = await Market.create({
 
