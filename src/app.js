@@ -9,8 +9,8 @@ import routes from'./routes';
 class App{
     constructor(){
         this.server = express();
-        mongoose.connect('mongodb+srv://fleamarket:flea123@fleamarket.kgsvkbp.mongodb.net/fleamarket?retryWrites=true&w=majority'
-          
+        mongoose.connect('Link the mangodatabase'
+
 
         );
 
@@ -26,7 +26,7 @@ middlewares(){
     this.server.use(
         '/files',
         express.static(path.resolve(__dirname ,'..', 'uploads'))
-        
+
     );
 
     this.server.use(express.json());

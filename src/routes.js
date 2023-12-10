@@ -18,7 +18,7 @@ routes.get('/markets', MarketController.index);
 routes.get('/dashboard', DashboardController.show);
 routes.get('/purchase', PurchaseController.index);
 
-//Routes type Post
+//Routes type Post (create)
 routes.post('/sessions' , SessionController.store);
 routes.post('/markets' , upload.single('thumbnail'), MarketController.store);
 
