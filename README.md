@@ -105,42 +105,214 @@ flea_market/
 
 ## API Endpoints
 
+### Authentication
+
+#### Create or Retrieve User Session
+
+- **POST /sessions**
+- **Description:** Register a new user or log in an existing user by email.
+- **Request Body:**
+  ```json
+  {
+    "email": "user@example.com"
+  }
+  ```
+- **Response:**
+  - `200 OK` (user object)
+  - `400 Bad Request` (invalid email)
+- **Example Response:**
+  ```json
+  {
+    "_id": "...",
+    "email": "user@example.com"
+  }
+  ```
+
+---
+
 ### Market
 
--   `GET /markets?status=true|false`  
-    List all market items filtered by status (available/reserved).
+#### List Market Items
 
--   `POST /markets`  
-    Create a new market item (requires image upload and authentication).
+- **GET /markets?status=true|false**
+- **Description:** List all market items filtered by status (available or reserved).
+- **Query Parameters:**
+  - `status` (boolean, required): `true` for available, `false` for reserved
+- **Response:**
+  - `200 OK` (array of market items)
+- **Example Response:**
+  ```json
+  [
+    {
+      "_id": "...",
+      "thumbnail": "image.jpg",
+      "description": "A nice item",
+      "price": 100,
+      "status": true,
+      "user": "..."
+    }
+  ]
+  ```
 
--   `PUT /markets/:market_id`  
-    Update an existing market item (requires authentication).
+#### Create Market Item
 
--   `DELETE /markets`  
-    Delete a market item (requires authentication).
+- **POST /markets**
+- **Description:** Create a new market item. Requires authentication and image upload.
+- **Headers:**
+  - `user_id` (string, required): User ID from session
+- **Request Body (multipart/form-data):**
+  - `thumbnail` (file, required): Image file
+  - `description` (string, required)
+  - `price` (number, required)
+  - `status` (boolean, required)
+- **Response:**
+  - `200 OK` (created market item)
+  - `400 Bad Request` (validation error)
+- **Example Response:**
+  ```json
+  {
+    "_id": "...",
+    "thumbnail": "image.jpg",
+    "description": "A nice item",
+    "price": 100,
+    "status": true,
+    "user": "..."
+  }
+  ```
+
+#### Update Market Item
+
+- **PUT /markets/:market_id**
+- **Description:** Update an existing market item. Only the owner can update. Requires authentication and image upload.
+- **Headers:**
+  - `user_id` (string, required)
+- **Path Parameters:**
+  - `market_id` (string, required)
+- **Request Body (multipart/form-data):**
+  - `thumbnail` (file, required): Image file
+  - `description` (string, required)
+  - `price` (number, required)
+  - `status` (boolean, required)
+- **Response:**
+  - `200 OK` (empty)
+  - `400 Bad Request` (validation error)
+  - `401 Unauthorized` (not the owner)
+
+#### Delete Market Item
+
+- **DELETE /markets**
+- **Description:** Delete a market item. Only the owner can delete.
+- **Headers:**
+  - `user_id` (string, required)
+- **Request Body:**
+  ```json
+  {
+    "market_id": "..."
+  }
+  ```
+- **Response:**
+  - `200 OK` (success message)
+  - `401 Unauthorized` (not the owner)
+- **Example Response:**
+  ```json
+  { "message": "Deleted with Success" }
+  ```
+
+---
 
 ### Purchase
 
--   `GET /purchase`  
-    List all purchases for the authenticated user.
+#### List Purchases
 
--   `POST /markets/:market_id/purchase`  
-    Purchase (reserve) a market item.
+- **GET /purchase**
+- **Description:** List all purchases for the authenticated user.
+- **Headers:**
+  - `user_id` (string, required)
+- **Response:**
+  - `200 OK` (array of purchases)
+- **Example Response:**
+  ```json
+  [
+    {
+      "_id": "...",
+      "date": "2024-06-01T12:00:00Z",
+      "user": "...",
+      "market": { ... }
+    }
+  ]
+  ```
 
--   `DELETE /purchase/cancel`  
-    Cancel a purchase.
+#### Purchase Market Item
+
+- **POST /markets/:market_id/purchase**
+- **Description:** Reserve (purchase) a market item. Cannot purchase your own item.
+- **Headers:**
+  - `user_id` (string, required)
+- **Path Parameters:**
+  - `market_id` (string, required)
+- **Request Body:**
+  ```json
+  {
+    "date": "2024-06-01T12:00:00Z"
+  }
+  ```
+- **Response:**
+  - `200 OK` (purchase object)
+  - `400 Bad Request` (item does not exist or is reserved)
+  - `401 Unauthorized` (cannot buy your own item)
+- **Example Response:**
+  ```json
+  {
+    "_id": "...",
+    "date": "2024-06-01T12:00:00Z",
+    "user": "...",
+    "market": { ... }
+  }
+  ```
+
+#### Cancel Purchase
+
+- **DELETE /purchase/cancel**
+- **Description:** Cancel a purchase.
+- **Request Body:**
+  ```json
+  {
+    "purchase_id": "..."
+  }
+  ```
+- **Response:**
+  - `200 OK` (empty)
+
+---
 
 ### Dashboard
 
--   `GET /dashboard`  
-    List all market items created by the authenticated user.
+#### List User's Market Items
+
+- **GET /dashboard**
+- **Description:** List all market items created by the authenticated user.
+- **Headers:**
+  - `user_id` (string, required)
+- **Response:**
+  - `200 OK` (array of market items)
+
+---
+
+## Error Handling
+
+- `400 Bad Request`: Invalid input, missing required fields, or item does not exist.
+- `401 Unauthorized`: User is not authorized to perform the action (e.g., not the owner, or trying to buy own item).
+
+Example error response:
+```json
+{ "error": "bad request" }
+```
 
 ---
 
 ## Data Models
 
 ### User
-
 ```js
 {
     email: String;
@@ -148,7 +320,6 @@ flea_market/
 ```
 
 ### Market
-
 ```js
 {
   thumbnail: String,      // Image filename
@@ -158,12 +329,9 @@ flea_market/
   user: ObjectId (User)
 }
 ```
-
--   **Virtuals:**  
-    `thumbnail_url` - Returns the full URL to the uploaded image.
+- **Virtuals:**  `thumbnail_url` - Returns the full URL to the uploaded image.
 
 ### Purchase
-
 ```js
 {
   date: String,
@@ -176,25 +344,25 @@ flea_market/
 
 ## File Uploads
 
--   Uses Multer for handling file uploads.
--   Images are uploaded via the `POST /markets` and `PUT /markets/:market_id` endpoints.
--   Uploaded files are stored in the `uploads/` directory and accessible via `/files/<filename>`.
+- Uses Multer for handling file uploads.
+- Images are uploaded via the `POST /markets` and `PUT /markets/:market_id` endpoints.
+- Uploaded files are stored in the `uploads/` directory and accessible via `/files/<filename>`.
 
 ---
 
 ## Authentication
 
--   Authentication is handled via a `user_id` header in requests.
--   Users cannot purchase their own items.
--   Only the owner can update or delete their own market items.
+- Authentication is handled via a `user_id` header in requests.
+- Users cannot purchase their own items.
+- Only the owner can update or delete their own market items.
 
 ---
 
 ## Development
 
--   **Start server:** `yarn dev` or `npm run dev`
--   **Hot reload:** Enabled via `nodemon`
--   **Dependencies:** Express, Mongoose, Multer, Yup, CORS
+- **Start server:** `yarn dev` or `npm run dev`
+- **Hot reload:** Enabled via `nodemon`
+- **Dependencies:** Express, Mongoose, Multer, Yup, CORS
 
 ---
 
